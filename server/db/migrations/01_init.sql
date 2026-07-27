@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS docs (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  text TEXT,
+  url TEXT,
+  hn_id INTEGER UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
