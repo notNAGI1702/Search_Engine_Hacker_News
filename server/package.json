@@ -1,0 +1,7 @@
+{
+  "name": "hn-search-server",
+  "version": "1.0.0",
+  "description": "Hacker News Search Server",
+  "main": "index.js",
+  "dependencies": {}
+}

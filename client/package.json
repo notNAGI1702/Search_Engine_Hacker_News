@@ -1,0 +1,6 @@
+{
+  "name": "hn-search-client",
+  "version": "1.0.0",
+  "description": "Hacker News Search Client",
+  "dependencies": {}
+}

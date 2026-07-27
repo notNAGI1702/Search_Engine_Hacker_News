@@ -1,0 +1,7 @@
+{
+  "name": "hn-search-crawler",
+  "version": "1.0.0",
+  "description": "Hacker News Crawler",
+  "main": "scheduler.js",
+  "dependencies": {}
+}
