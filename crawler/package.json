@@ -3,5 +3,13 @@
   "version": "1.0.0",
   "description": "Hacker News Crawler",
   "main": "scheduler.js",
-  "dependencies": {}
+  "scripts": {
+    "start": "node scheduler.js",
+    "crawl": "node fetchHN.js"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0"
+  }
 }
