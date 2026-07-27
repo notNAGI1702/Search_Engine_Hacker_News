@@ -4,19 +4,25 @@ const db = require('../server/db/index');
 
 const HN_ALGOLIA_BASE_URL = process.env.HN_ALGOLIA_BASE_URL || 'https://hn.algolia.com/api/v1';
 
-// Strip HTML tags and clean up common HTML entities
+// Strip HTML tags and decode all HTML entities (named, decimal, hex)
 function cleanHtml(html) {
   if (!html) return '';
-  return html
-    .replace(/<[^>]*>/g, ' ')
+  // 1. Strip HTML tags
+  let text = html.replace(/<[^>]*>/g, ' ');
+  // 2. Decode entities (hex, decimal, and common named entities)
+  text = text
+    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+    .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
+    .replace(/&apos;/g, "'")
     .replace(/&#x27;/g, "'")
     .replace(/&#x60;/g, "`")
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&nbsp;/g, ' ');
+  // 3. Normalize whitespace
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 async function fetchStories() {
@@ -53,12 +59,12 @@ async function saveToDatabase(items, type) {
     const createdAt = item.created_at ? new Date(item.created_at) : new Date();
 
     if (type === 'story') {
-      title = item.title || '';
-      text = item.story_text || '';
+      title = cleanHtml(item.title || '');
+      text = cleanHtml(item.story_text || '');
       url = item.url || `https://news.ycombinator.com/item?id=${hnId}`;
     } else if (type === 'comment') {
       const author = item.author || 'anonymous';
-      const storyTitle = item.story_title || 'Story';
+      const storyTitle = cleanHtml(item.story_title || 'Story');
       title = `Comment by ${author} on "${storyTitle}"`;
       text = cleanHtml(item.comment_text || '');
       url = `https://news.ycombinator.com/item?id=${item.story_id || hnId}`;
