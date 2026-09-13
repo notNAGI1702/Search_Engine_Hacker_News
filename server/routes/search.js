@@ -7,9 +7,17 @@ const db = require('../db/index');
 const RANKER_BIN_PATH = path.resolve(__dirname, '../../engine/build/ranker');
 
 router.get('/', async (req, res) => {
+  const start = process.hrtime.bigint();
   const query = req.query.q;
 
+  const logLatency = () => {
+    const end = process.hrtime.bigint();
+    const durationMs = Number(end - start) / 1e6;
+    console.log(`Latency: ${durationMs.toFixed(2)} ms`);
+  };
+
   if (!query || query.trim() === '') {
+    logLatency();
     return res.json([]);
   }
 
@@ -18,6 +26,7 @@ router.get('/', async (req, res) => {
     if (err) {
       console.error('Error executing C++ ranker:', err);
       console.error('Stderr:', stderr);
+      logLatency();
       return res.status(500).json({ error: 'Search ranker failed' });
     }
 
@@ -33,6 +42,7 @@ router.get('/', async (req, res) => {
       }).filter(item => !isNaN(item.id) && !isNaN(item.score));
 
       if (matches.length === 0) {
+        logLatency();
         return res.json([]);
       }
 
@@ -66,9 +76,11 @@ router.get('/', async (req, res) => {
         })
         .filter(Boolean);
 
+      logLatency();
       return res.json(orderedResults);
     } catch (dbErr) {
       console.error('Database error in search route:', dbErr);
+      logLatency();
       return res.status(500).json({ error: 'Database search query failed' });
     }
   });
